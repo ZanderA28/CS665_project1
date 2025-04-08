@@ -16,16 +16,31 @@ class AircraftApp:
         self.login_frame = tkinter.Frame(self.root)
         self.login_frame.pack(pady=20)
 
-        tkinter.Label(self.login_frame, text="Username:").grid(row=0, column=0, sticky="e")
+        tkinter.Label(self.login_frame, text="ALEX'S AIRCRAFT DATA ACCESS").grid(row=0, column=1, sticky="e")
+
+        tkinter.Label(self.login_frame, text="Username:").grid(row=1, column=0, sticky="e")
         self.username_entry = tkinter.Entry(self.login_frame)
-        self.username_entry.grid(row=0, column=1)
+        self.username_entry.grid(row=1, column=1)
 
-        tkinter.Label(self.login_frame, text="Password:").grid(row=1, column=0, sticky="e")
+        tkinter.Label(self.login_frame, text="Password:").grid(row=2, column=0, sticky="e")
         self.password_entry = tkinter.Entry(self.login_frame, show="*")
-        self.password_entry.grid(row=1, column=1)
+        self.password_entry.grid(row=2, column=1)
 
-        login_button = tkinter.Button(self.login_frame, text="Connect", command=NULL)
-        login_button.grid(row=3, column=1)
+        login_button = tkinter.Button(self.login_frame, text="Connect", command=self.connect_to_db)
+        login_button.grid(row=4, column=1)
+
+    def connect_to_db(self):
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+
+        self.conn = mysql.connector.connect(
+            host="localhost",
+            user=username,
+            password=password,
+            database="alexsaircraft"
+        )
+        self.cursor = self.conn.cursor()
+        print("connected to database")
 
 
 
