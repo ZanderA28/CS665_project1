@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 import tkinter
 import mysql.connector
 
@@ -23,7 +24,10 @@ class AircraftApp:
         self.password_entry = tkinter.Entry(self.login_frame, show="*")
         self.password_entry.grid(row=1, column=1)
 
-        
+        login_button = tkinter.Button(self.login_frame, text="Connect", command=NULL)
+        login_button.grid(row=3, column=1)
+
+
 
 
 
