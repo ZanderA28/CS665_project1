@@ -56,7 +56,9 @@ class AircraftApp:
         select_button = tkinter.Button(self.home_frame, text="Display", command=self.show_aircraft)
         select_button.grid(row=1, column=1)
 
-
+    def show_aircraft(self):
+        print("show aircraft clicked")
+        
 if __name__ == "__main__":
     root = tkinter.Tk()
     app = AircraftApp(root)
