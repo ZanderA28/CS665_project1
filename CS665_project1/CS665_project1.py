@@ -1,6 +1,7 @@
-from asyncio.windows_events import NULL
 import tkinter
+from tkinter import ttk
 import mysql.connector
+from tkinter import ttk, messagebox
 
 
 
@@ -29,6 +30,7 @@ class AircraftApp:
         login_button = tkinter.Button(self.login_frame, text="Connect", command=self.connect_to_db)
         login_button.grid(row=4, column=1)
 
+
     def connect_to_db(self):
         username = self.username_entry.get()
         password = self.password_entry.get()
@@ -41,11 +43,18 @@ class AircraftApp:
         )
         self.cursor = self.conn.cursor()
         print("connected to database")
+        self.home_frame()
+        
+        
 
+    def home_frame(self):
+        self.login_frame.destroy()
+        self.home_frame = tkinter.Frame(self.root)
+        self.home_frame.pack(pady = 20)
 
-
-
-
+        tkinter.Label(self.home_frame, text="HOME").grid(row=0, column=1, sticky="e")
+        select_button = tkinter.Button(self.home_frame, text="Display", command=self.show_aircraft)
+        select_button.grid(row=1, column=1)
 
 
 if __name__ == "__main__":
