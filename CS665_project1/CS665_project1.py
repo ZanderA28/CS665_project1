@@ -56,8 +56,24 @@ class AircraftApp:
         select_button = tkinter.Button(self.home_frame, text="Display", command=self.show_aircraft)
         select_button.grid(row=1, column=1)
 
+    
     def show_aircraft(self):
-        print("show aircraft clicked")
+        self.tree = ttk.Treeview(self.root)
+        self.tree.pack(fill="both", expand=True)
+
+        self.cursor.execute("SELECT * FROM aircraft")
+        rows = self.cursor.fetchall()
+        columns = [desc[0] for desc in self.cursor.description]
+
+        self.tree["columns"] = columns
+        self.tree["show"] = "headings"
+
+        for col in columns:
+            self.tree.heading(col, text=col)
+            self.tree.column(col, width=100)
+
+        for row in rows:
+            self.tree.insert("", "end", values=row)
         
 if __name__ == "__main__":
     root = tkinter.Tk()
