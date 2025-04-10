@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 import tkinter
 from tkinter import ttk
 import mysql.connector
@@ -50,12 +51,21 @@ class AircraftApp:
     def home_frame(self):
         self.login_frame.destroy()
         self.home_frame = tkinter.Frame(self.root)
+        dropdown_frame = tkinter.Frame(self.root)
         self.home_frame.pack(pady = 20)
+        dropdown_frame.pack(pady=10)
 
         tkinter.Label(self.home_frame, text="HOME").grid(row=0, column=1, sticky="e")
+        tkinter.Label(dropdown_frame, text="Choose Action:").pack(side="left")
         select_button = tkinter.Button(self.home_frame, text="Display", command=self.show_aircraft)
         select_button.grid(row=1, column=1)
 
+
+        self.action_var = tkinter.StringVar()
+        action_menu = ttk.Combobox(dropdown_frame, textvariable=self.action_var, state="readonly")
+        action_menu["values"] = ("Select", "Add", "Update", "Delete")
+        action_menu.pack(side="left", padx=10)
+        action_menu.bind("<<ComboboxSelected>>", NULL)
     
     def show_aircraft(self):
         self.tree = ttk.Treeview(self.root)
