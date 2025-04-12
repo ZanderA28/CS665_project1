@@ -57,7 +57,7 @@ class AircraftApp:
 
         tkinter.Label(self.home_frame, text="HOME").grid(row=0, column=1, sticky="e")
         tkinter.Label(dropdown_frame, text="Choose Action:").pack(side="left")
-        select_button = tkinter.Button(self.home_frame, text="Display", command=self.show_aircraft)
+        select_button = tkinter.Button(self.home_frame, text="Display", command=self.select_frame)
         select_button.grid(row=1, column=1)
 
         sql_buttons_frame = tkinter.LabelFrame(self.root, text="Predefined SQL Queries", padx=10, pady=10)
@@ -78,7 +78,7 @@ class AircraftApp:
     def handle_action_change(self, event):
         selected_action = self.action_var.get()
         if selected_action == "Select":
-            self.show_aircraft()
+            self.select_frame()
             print("reading database")
         elif selected_action == "Add":
             messagebox.showinfo("Action", NULL)
@@ -90,27 +90,21 @@ class AircraftApp:
             messagebox.showinfo("Action", NULL)
             print("deleting from database")
     
-    def show_aircraft(self):
+    def select_frame(self):
         self.home_frame.destroy()
-        self.read_frame = tkinter.Frame(self.root)
-        self.read_frame.pack(pady = 20)
+        self.select_frame = tkinter.Frame(self.root)
+        self.select_frame.pack(pady = 20)
 
         self.tree = ttk.Treeview(self.root)
         self.tree.pack(fill="both", expand=True)
+        tkinter.Label(self.select_frame, text="Select a table to view:").pack()
 
-        self.cursor.execute("SELECT * FROM aircraft")
-        rows = self.cursor.fetchall()
-        columns = [desc[0] for desc in self.cursor.description]
-
-        self.tree["columns"] = columns
-        self.tree["show"] = "headings"
-
-        for col in columns:
-            self.tree.heading(col, text=col)
-            self.tree.column(col, width=100)
-
-        for row in rows:
-            self.tree.insert("", "end", values=row)
+        self.table_var = tkinter.StringVar()
+        self.table_dropdown = ttk.Combobox(self.select_frame, textvariable=self.table_var, state="readonly")
+        self.table_dropdown["values"] = ("aircraft", "customer", "employee", "eart")
+        self.table_dropdown.pack(pady=5)
+        selected_table = self.table_var.get()
+        
 
     def query_customers_aircraft(self):
         self.tree = ttk.Treeview(self.root)
