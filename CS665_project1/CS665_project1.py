@@ -66,6 +66,9 @@ class AircraftApp:
         join_customers_button = tkinter.Button(sql_buttons_frame, text="Customers & Aircraft", command=self.query_customers_aircraft)
         join_customers_button.grid(row=1, column=0, pady=5)
 
+        join_employees_parts = tkinter.Button(sql_buttons_frame, text="Employees & Parts", command=self.query_employees_max_parts)
+        join_employees_parts.grid(row=1, column=1, pady=5)
+
         self.action_var = tkinter.StringVar()
         action_menu = ttk.Combobox(dropdown_frame, textvariable=self.action_var, state="readonly")
         action_menu["values"] = ("Select", "Add", "Update", "Delete")
@@ -98,6 +101,29 @@ class AircraftApp:
         SELECT c.Customer_ID, c.Name AS Customer_Name, a.Model_Name, a.Type
         FROM Customer c
         JOIN Aircraft a ON c.Purchased_Model = a.Model_ID
+        """
+        self.cursor.execute(query)
+        rows = self.cursor.fetchall()
+        columns = [desc[0] for desc in self.cursor.description]
+
+        self.tree["columns"] = columns
+        self.tree["show"] = "headings"
+
+        for col in columns:
+            self.tree.heading(col, text=col)
+            self.tree.column(col, width=100)
+
+        for row in rows:
+            self.tree.insert("", "end", values=row)
+
+    def query_employees_max_parts(self):
+        self.tree = ttk.Treeview(self.root)
+        self.tree.pack(fill="both", expand=True)
+        query = """
+        SELECT e.Employee_ID, e.Name, e.Role, p.Part_Name, p.Quantity
+        FROM Employee e
+        JOIN Part p ON e.Part_Station_ID = p.Part_ID
+        ORDER BY p.Quantity desc
         """
         self.cursor.execute(query)
         rows = self.cursor.fetchall()
