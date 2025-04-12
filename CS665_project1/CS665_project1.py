@@ -73,9 +73,28 @@ class AircraftApp:
         action_menu = ttk.Combobox(dropdown_frame, textvariable=self.action_var, state="readonly")
         action_menu["values"] = ("Select", "Add", "Update", "Delete")
         action_menu.pack(side="left", padx=10)
-        action_menu.bind("<<ComboboxSelected>>", NULL)
+        action_menu.bind("<<ComboboxSelected>>", self.handle_action_change)
+
+    def handle_action_change(self, event):
+        selected_action = self.action_var.get()
+        if selected_action == "Select":
+            self.show_aircraft()
+            print("reading database")
+        elif selected_action == "Add":
+            messagebox.showinfo("Action", NULL)
+            print("adding to database")
+        elif selected_action == "Update":
+            messagebox.showinfo("Action", NULL)
+            print("updating database")
+        elif selected_action == "Delete":
+            messagebox.showinfo("Action", NULL)
+            print("deleting from database")
     
     def show_aircraft(self):
+        self.home_frame.destroy()
+        self.read_frame = tkinter.Frame(self.root)
+        self.read_frame.pack(pady = 20)
+
         self.tree = ttk.Treeview(self.root)
         self.tree.pack(fill="both", expand=True)
 
