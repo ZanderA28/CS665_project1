@@ -60,6 +60,11 @@ class AircraftApp:
         select_button = tkinter.Button(self.home_frame, text="Display", command=self.show_aircraft)
         select_button.grid(row=1, column=1)
 
+        sql_buttons_frame = tkinter.LabelFrame(self.root, text="Predefined SQL Queries", padx=10, pady=10)
+        sql_buttons_frame.pack(pady=10)
+
+        join_customers_button = tkinter.Button(sql_buttons_frame, text="Customers & Aircraft", command=self.query_customers_aircraft)
+        join_customers_button.grid(row=1, column=0, pady=5)
 
         self.action_var = tkinter.StringVar()
         action_menu = ttk.Combobox(dropdown_frame, textvariable=self.action_var, state="readonly")
@@ -84,6 +89,30 @@ class AircraftApp:
 
         for row in rows:
             self.tree.insert("", "end", values=row)
+
+    def query_customers_aircraft(self):
+        self.tree = ttk.Treeview(self.root)
+        self.tree.pack(fill="both", expand=True)
+
+        query = """
+        SELECT c.Customer_ID, c.Name AS Customer_Name, a.Model_Name, a.Type
+        FROM Customer c
+        JOIN Aircraft a ON c.Purchased_Model = a.Model_ID
+        """
+        self.cursor.execute(query)
+        rows = self.cursor.fetchall()
+        columns = [desc[0] for desc in self.cursor.description]
+
+        self.tree["columns"] = columns
+        self.tree["show"] = "headings"
+
+        for col in columns:
+            self.tree.heading(col, text=col)
+            self.tree.column(col, width=100)
+
+        for row in rows:
+            self.tree.insert("", "end", values=row)
+
         
 if __name__ == "__main__":
     root = tkinter.Tk()
