@@ -104,6 +104,32 @@ class AircraftApp:
         self.table_dropdown["values"] = ("aircraft", "customer", "employee", "eart")
         self.table_dropdown.pack(pady=5)
         selected_table = self.table_var.get()
+
+        go_button = tkinter.Button(self.select_frame, text="Go", command=self.display_selected)
+        go_button.pack(pady=5)
+
+        self.tree = ttk.Treeview(self.root)
+        self.tree.pack(fill="both", expand=True)
+
+        
+    def display_selected(self):
+        if hasattr(self, 'tree'):
+            self.tree.delete(*self.tree.get_children())
+        selected_table = self.table_var.get()
+        
+        self.cursor.execute(f"SELECT * FROM {selected_table}")
+        rows = self.cursor.fetchall()
+        columns = [desc[0] for desc in self.cursor.description]
+
+        self.tree["columns"] = columns
+        self.tree["show"] = "headings"
+
+        for col in columns:
+            self.tree.heading(col, text=col)
+            self.tree.column(col, width=100)
+
+        for row in rows:
+            self.tree.insert("", "end", values=row)
         
 
     def query_customers_aircraft(self):
