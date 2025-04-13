@@ -87,7 +87,7 @@ class AircraftApp:
             self.update_frame()
             print("updating database")
         elif selected_action == "Delete":
-            messagebox.showinfo("Action", NULL)
+            self.delete_frame()
             print("deleting from database")
     
     def select_frame(self):
@@ -204,13 +204,82 @@ class AircraftApp:
         set_clause = ", ".join(f"{col} = %s" for col in columns[1:])
         query = f"UPDATE {table_name} SET {set_clause} WHERE {columns[0]} = %s"
 
-        try:
-            self.cursor.execute(query, updated_values[1:] + [self.selected_row_id])
-            self.conn.commit()
-            messagebox.showinfo("Success", "Record updated.")
-            self.load_table_for_update()
-        except Exception as e:
-            messagebox.showerror("Database Error", str(e))
+        self.cursor.execute(query, updated_values[1:] + [self.selected_row_id])
+        self.conn.commit()
+        messagebox.showinfo("Success", "Record updated.")
+        self.load_table_for_update()
+        
+
+
+
+    def delete_frame(self):
+        self.home_frame.destroy()
+        self.delete_frame = tkinter.Frame(self.root)
+        self.delete_frame.pack(pady=20)
+
+        tkinter.Label(self.delete_frame, text="Select a table to delete from:").pack()
+
+        self.delete_table_var = tkinter.StringVar()
+        self.delete_table_dropdown = ttk.Combobox(self.delete_frame, textvariable=self.delete_table_var, state="readonly")
+        self.delete_table_dropdown["values"] = ("aircraft", "part", "employee", "customer")
+        self.delete_table_dropdown.pack(pady=5)
+
+        go_button = tkinter.Button(self.delete_frame, text="Go", command=self.load_table_for_delete)
+        go_button.pack(pady=5)
+
+        self.delete_tree = ttk.Treeview(self.root)
+        self.delete_tree.pack(fill="both", expand=True)
+
+        delete_button = tkinter.Button(self.root, text="Delete Selected Row", command=self.delete_selected_row)
+        delete_button.pack(pady=5)
+
+
+
+    def load_table_for_delete(self):
+        for widget in self.delete_tree.get_children():
+            self.delete_tree.delete(widget)
+
+        selected_table = self.delete_table_var.get()
+        self.cursor.execute(f"SELECT * FROM {selected_table}")
+        rows = self.cursor.fetchall()
+        columns = [desc[0] for desc in self.cursor.description]
+
+        self.delete_tree["columns"] = columns
+        self.delete_tree["show"] = "headings"
+
+        for col in columns:
+            self.delete_tree.heading(col, text=col)
+            self.delete_tree.column(col, width=100)
+
+        for row in rows:
+            self.delete_tree.insert("", "end", values=row)
+
+        self.delete_columns = columns
+        self.delete_table_name = selected_table
+
+
+    def delete_selected_row(self):
+        selected_item = self.delete_tree.selection()
+        if not selected_item:
+            messagebox.showwarning("Warning", "No row selected.")
+            return
+
+        values = self.delete_tree.item(selected_item[0], "values")
+        primary_key_column = self.delete_columns[0]
+        primary_key_value = values[0]
+
+        confirm = messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete row with {primary_key_column} = {primary_key_value}?")
+        if not confirm:
+            return
+
+        query = f"DELETE FROM {self.delete_table_name} WHERE {primary_key_column} = %s"
+        self.cursor.execute(query, (primary_key_value,))
+        self.conn.commit()
+        messagebox.showinfo("Success", "Row deleted successfully.")
+        self.load_table_for_delete()
+        
+
+
 
 
     def query_customers_aircraft(self):
