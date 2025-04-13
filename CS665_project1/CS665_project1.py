@@ -74,9 +74,12 @@ class AircraftApp:
         action_menu["values"] = ("Home", "Select", "Insert", "Update", "Delete")
         action_menu.current(0)
         action_menu.pack(side="left", padx=10)
-        action_menu.bind("<<ComboboxSelected>>", self.handle_action_change)
+        
+        go_button = tkinter.Button(dropdown_frame, text="Go", command=self.handle_action_change)
+        go_button.pack(side="left")
 
-    def handle_action_change(self, event):
+
+    def handle_action_change(self):
         selected_action = self.action_var.get()
         if selected_action == "Select":
             self.select_frame()
