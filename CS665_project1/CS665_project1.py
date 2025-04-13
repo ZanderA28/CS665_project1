@@ -71,7 +71,7 @@ class AircraftApp:
 
         self.action_var = tkinter.StringVar()
         action_menu = ttk.Combobox(dropdown_frame, textvariable=self.action_var, state="readonly")
-        action_menu["values"] = ("Select", "Add", "Update", "Delete")
+        action_menu["values"] = ("Select", "Insert", "Update", "Delete")
         action_menu.pack(side="left", padx=10)
         action_menu.bind("<<ComboboxSelected>>", self.handle_action_change)
 
@@ -80,8 +80,8 @@ class AircraftApp:
         if selected_action == "Select":
             self.select_frame()
             print("reading database")
-        elif selected_action == "Add":
-            messagebox.showinfo("Action", NULL)
+        elif selected_action == "Insert":
+            self.insert_frame()
             print("adding to database")
         elif selected_action == "Update":
             self.update_frame()
@@ -101,7 +101,7 @@ class AircraftApp:
 
         self.table_var = tkinter.StringVar()
         self.table_dropdown = ttk.Combobox(self.select_frame, textvariable=self.table_var, state="readonly")
-        self.table_dropdown["values"] = ("aircraft", "customer", "employee", "eart")
+        self.table_dropdown["values"] = ("aircraft", "part", "employee", "customer")
         self.table_dropdown.pack(pady=5)
         selected_table = self.table_var.get()
 
@@ -278,6 +278,66 @@ class AircraftApp:
         messagebox.showinfo("Success", "Row deleted successfully.")
         self.load_table_for_delete()
         
+
+
+    def insert_frame(self):
+        self.home_frame.destroy()
+        self.insert_frame = tkinter.Frame(self.root)
+        self.insert_frame.pack(pady=20)
+
+        tkinter.Label(self.insert_frame, text="Select a table to insert into:").pack()
+
+        self.insert_table_var = tkinter.StringVar()
+        self.insert_table_dropdown = ttk.Combobox(self.insert_frame, textvariable=self.insert_table_var, state="readonly")
+        self.insert_table_dropdown["values"] = ("aircraft", "part", "employee", "customer") 
+        self.insert_table_dropdown.pack(pady=5)
+
+        go_button = tkinter.Button(self.insert_frame, text="Go", command=self.load_fields_for_insert)
+        go_button.pack(pady=5)
+
+
+    def load_fields_for_insert(self):
+        selected_table = self.insert_table_var.get()
+
+        self.cursor.execute(f"SELECT * FROM {selected_table}")
+        columns = [desc[0] for desc in self.cursor.description]
+
+        
+        self.insert_columns = columns
+        self.insert_table_name = selected_table
+
+        
+        if hasattr(self, 'input_frame'):
+            self.input_frame.destroy()
+
+        self.input_frame = tkinter.Frame(self.root)
+        self.input_frame.pack(pady=10)
+
+        self.input_entries = []
+        for i, col in enumerate(columns):
+            tkinter.Label(self.input_frame, text=col).grid(row=0, column=i)
+            entry = tkinter.Entry(self.input_frame)
+            entry.grid(row=1, column=i, padx=5)
+            self.input_entries.append(entry)
+
+        insert_button = tkinter.Button(self.root, text="Insert Row", command=self.insert_row)
+        insert_button.pack(pady=5)
+
+    def insert_row(self):
+        values = [entry.get() for entry in self.input_entries]
+
+        placeholders = ", ".join(["%s"] * len(values))
+        columns_str = ", ".join(self.insert_columns)
+        query = f"INSERT INTO {self.insert_table_name} ({columns_str}) VALUES ({placeholders})"
+
+        try:
+            self.cursor.execute(query, values)
+            self.conn.commit()
+            messagebox.showinfo("Success", "Row added successfully.")
+            for entry in self.input_entries:
+                entry.delete(0, tkinter.END)
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
 
 
 
