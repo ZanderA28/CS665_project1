@@ -50,14 +50,14 @@ class AircraftApp:
 
     def home_frame(self):
         self.login_frame.destroy()
-        self.home_frame = tkinter.Frame(self.root)
+        self.home_content_frame = tkinter.Frame(self.root)
         dropdown_frame = tkinter.Frame(self.root)
-        self.home_frame.pack(pady = 20)
+        self.home_content_frame.pack(pady = 20)
         dropdown_frame.pack(pady=10)
 
-        tkinter.Label(self.home_frame, text="HOME").grid(row=0, column=1, sticky="e")
+        tkinter.Label(self.home_content_frame, text="HOME").grid(row=0, column=1, sticky="e")
         tkinter.Label(dropdown_frame, text="Choose Action:").pack(side="left")
-        select_button = tkinter.Button(self.home_frame, text="Display", command=self.select_frame)
+        select_button = tkinter.Button(self.home_content_frame, text="Display", command=self.select_frame)
         select_button.grid(row=1, column=1)
 
         sql_buttons_frame = tkinter.LabelFrame(self.root, text="Predefined SQL Queries", padx=10, pady=10)
@@ -71,7 +71,8 @@ class AircraftApp:
 
         self.action_var = tkinter.StringVar()
         action_menu = ttk.Combobox(dropdown_frame, textvariable=self.action_var, state="readonly")
-        action_menu["values"] = ("Select", "Insert", "Update", "Delete")
+        action_menu["values"] = ("Home", "Select", "Insert", "Update", "Delete")
+        action_menu.current(0)
         action_menu.pack(side="left", padx=10)
         action_menu.bind("<<ComboboxSelected>>", self.handle_action_change)
 
@@ -89,9 +90,12 @@ class AircraftApp:
         elif selected_action == "Delete":
             self.delete_frame()
             print("deleting from database")
+        elif selected_action == "Home":
+            self.home_frame()
+            print("going home")
     
     def select_frame(self):
-        self.home_frame.destroy()
+        self.home_content_frame.destroy()
         self.select_frame = tkinter.Frame(self.root)
         self.select_frame.pack(pady = 20)
 
@@ -133,7 +137,7 @@ class AircraftApp:
 
 
     def update_frame(self):
-        self.home_frame.destroy()
+        self.home_content_frame.destroy()
         self.update_frame = tkinter.Frame(self.root)
         self.update_frame.pack(pady=20)
 
@@ -213,7 +217,7 @@ class AircraftApp:
 
 
     def delete_frame(self):
-        self.home_frame.destroy()
+        self.home_content_frame.destroy()
         self.delete_frame = tkinter.Frame(self.root)
         self.delete_frame.pack(pady=20)
 
@@ -281,7 +285,7 @@ class AircraftApp:
 
 
     def insert_frame(self):
-        self.home_frame.destroy()
+        self.home_content_frame.destroy()
         self.insert_frame = tkinter.Frame(self.root)
         self.insert_frame.pack(pady=20)
 
