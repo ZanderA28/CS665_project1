@@ -72,10 +72,8 @@ class AircraftApp:
         self.active_frame.pack(pady=20)
 
 
-        tkinter.Label(self.active_frame, text="HOME").grid(row=0, column=1, sticky="e")
+        tkinter.Label(self.active_frame, text="HOME").grid(row=0, column=0, sticky="e")
         
-        select_button = tkinter.Button(self.active_frame, text="Display", command=self.select_frame)
-        select_button.grid(row=1, column=1)
 
         sql_buttons_frame = tkinter.LabelFrame(self.active_frame, text="Predefined SQL Queries", padx=10, pady=10)
         sql_buttons_frame.grid(row=2, column=1)
@@ -115,8 +113,7 @@ class AircraftApp:
         self.active_frame = tkinter.Frame(self.root)
         self.active_frame.pack(pady=20)
 
-        self.tree = ttk.Treeview(self.active_frame)
-        self.tree.pack(fill="both", expand=True)
+     
         tkinter.Label(self.active_frame, text="Select a table to view:").pack()
 
         self.table_var = tkinter.StringVar()
