@@ -11,7 +11,7 @@ class AircraftApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Alex's Aircraft Database")
-
+        self.active_frame = None
         self.create_login_frame()
 
     def create_login_frame(self):
@@ -44,24 +44,41 @@ class AircraftApp:
         )
         self.cursor = self.conn.cursor()
         print("connected to database")
+        self.create_nav_bar()
         self.home_frame()
         
-        
+    
+    def create_nav_bar(self):
+        self.nav_frame = tkinter.Frame(self.root)
+        self.nav_frame.pack(pady=10)
+
+        self.action_var = tkinter.StringVar()
+        action_menu = ttk.Combobox(self.nav_frame, textvariable=self.action_var, state="readonly")
+        action_menu["values"] = ("Home", "Select", "Insert", "Update", "Delete")
+        action_menu.current(0)
+        action_menu.pack(side="left", padx=10)
+
+        go_button = tkinter.Button(self.nav_frame, text="Go", command=self.handle_action_change)
+        go_button.pack(side="left")
+
 
     def home_frame(self):
         self.login_frame.destroy()
-        self.home_content_frame = tkinter.Frame(self.root)
-        dropdown_frame = tkinter.Frame(self.root)
-        self.home_content_frame.pack(pady = 20)
-        dropdown_frame.pack(pady=10)
 
-        tkinter.Label(self.home_content_frame, text="HOME").grid(row=0, column=1, sticky="e")
-        tkinter.Label(dropdown_frame, text="Choose Action:").pack(side="left")
-        select_button = tkinter.Button(self.home_content_frame, text="Display", command=self.select_frame)
+        if self.active_frame:
+            self.active_frame.destroy()
+
+        self.active_frame = tkinter.Frame(self.root)
+        self.active_frame.pack(pady=20)
+
+
+        tkinter.Label(self.active_frame, text="HOME").grid(row=0, column=1, sticky="e")
+        
+        select_button = tkinter.Button(self.active_frame, text="Display", command=self.select_frame)
         select_button.grid(row=1, column=1)
 
-        sql_buttons_frame = tkinter.LabelFrame(self.root, text="Predefined SQL Queries", padx=10, pady=10)
-        sql_buttons_frame.pack(pady=10)
+        sql_buttons_frame = tkinter.LabelFrame(self.active_frame, text="Predefined SQL Queries", padx=10, pady=10)
+        sql_buttons_frame.grid(row=2, column=1)
 
         join_customers_button = tkinter.Button(sql_buttons_frame, text="Customers & Aircraft", command=self.query_customers_aircraft)
         join_customers_button.grid(row=1, column=0, pady=5)
@@ -69,15 +86,8 @@ class AircraftApp:
         join_employees_parts = tkinter.Button(sql_buttons_frame, text="Employees & Parts", command=self.query_employees_max_parts)
         join_employees_parts.grid(row=1, column=1, pady=5)
 
-        self.action_var = tkinter.StringVar()
-        action_menu = ttk.Combobox(dropdown_frame, textvariable=self.action_var, state="readonly")
-        action_menu["values"] = ("Home", "Select", "Insert", "Update", "Delete")
-        action_menu.current(0)
-        action_menu.pack(side="left", padx=10)
         
-        go_button = tkinter.Button(dropdown_frame, text="Go", command=self.handle_action_change)
-        go_button.pack(side="left")
-
+   
 
     def handle_action_change(self):
         selected_action = self.action_var.get()
@@ -98,24 +108,27 @@ class AircraftApp:
             print("going home")
     
     def select_frame(self):
-        self.home_content_frame.destroy()
-        self.select_frame = tkinter.Frame(self.root)
-        self.select_frame.pack(pady = 20)
+        if self.active_frame:
+            self.active_frame.destroy()
 
-        self.tree = ttk.Treeview(self.root)
+
+        self.active_frame = tkinter.Frame(self.root)
+        self.active_frame.pack(pady=20)
+
+        self.tree = ttk.Treeview(self.active_frame)
         self.tree.pack(fill="both", expand=True)
-        tkinter.Label(self.select_frame, text="Select a table to view:").pack()
+        tkinter.Label(self.active_frame, text="Select a table to view:").pack()
 
         self.table_var = tkinter.StringVar()
-        self.table_dropdown = ttk.Combobox(self.select_frame, textvariable=self.table_var, state="readonly")
+        self.table_dropdown = ttk.Combobox(self.active_frame, textvariable=self.table_var, state="readonly")
         self.table_dropdown["values"] = ("aircraft", "part", "employee", "customer")
         self.table_dropdown.pack(pady=5)
         selected_table = self.table_var.get()
 
-        go_button = tkinter.Button(self.select_frame, text="Go", command=self.display_selected)
+        go_button = tkinter.Button(self.active_frame, text="Go", command=self.display_selected)
         go_button.pack(pady=5)
 
-        self.tree = ttk.Treeview(self.root)
+        self.tree = ttk.Treeview(self.active_frame)
         self.tree.pack(fill="both", expand=True)
 
         
@@ -140,27 +153,36 @@ class AircraftApp:
 
 
     def update_frame(self):
-        self.home_content_frame.destroy()
-        self.update_frame = tkinter.Frame(self.root)
-        self.update_frame.pack(pady=20)
+        if self.active_frame:
+            self.active_frame.destroy()
 
-        tkinter.Label(self.update_frame, text="Select a table to update:").pack()
+        if hasattr(self, "entry_frame") and self.entry_frame.winfo_exists():
+            self.entry_frame.destroy()
+
+        self.active_frame = tkinter.Frame(self.root)
+        self.active_frame.pack(pady=20)
+
+        tkinter.Label(self.active_frame, text="Select a table to update:").pack()
 
         self.update_table_var = tkinter.StringVar()
-        self.update_table_dropdown = ttk.Combobox(self.update_frame, textvariable=self.update_table_var, state="readonly")
+        self.update_table_dropdown = ttk.Combobox(self.active_frame, textvariable=self.update_table_var, state="readonly")
         self.update_table_dropdown["values"] = ("aircraft", "part", "employee", "customer") 
         self.update_table_dropdown.pack(pady=5)
 
-        go_button = tkinter.Button(self.update_frame, text="Go", command=self.load_table_for_update)
+        go_button = tkinter.Button(self.active_frame, text="Go", command=self.load_table_for_update)
         go_button.pack(pady=5)
 
-        self.update_tree = ttk.Treeview(self.root)
+        self.update_tree = ttk.Treeview(self.active_frame)
         self.update_tree.pack(fill="both", expand=True)
 
 
     def load_table_for_update(self):
         for widget in self.update_tree.get_children():
             self.update_tree.delete(widget)
+
+        if hasattr(self, "entry_frame") and self.entry_frame.winfo_exists():
+            self.entry_frame.destroy()
+            self.update_btn.destroy()
 
         selected_table = self.update_table_var.get()
 
@@ -181,19 +203,19 @@ class AircraftApp:
         self.edit_fields = []
         self.selected_row_id = None
 
-        entry_frame = tkinter.Frame(self.root)
-        entry_frame.pack(pady=10)
+        self.entry_frame = tkinter.Frame(self.active_frame)
+        self.entry_frame.pack(pady=10)
 
         for i, col in enumerate(columns):
-            tkinter.Label(entry_frame, text=col).grid(row=0, column=i)
-            entry = tkinter.Entry(entry_frame)
+            tkinter.Label(self.entry_frame, text=col).grid(row=0, column=i)
+            entry = tkinter.Entry(self.entry_frame)
             entry.grid(row=1, column=i)
             self.edit_fields.append(entry)
 
         self.update_tree.bind("<<TreeviewSelect>>", self.on_update_row_select)
 
-        update_btn = tkinter.Button(self.root, text="Update Selected Row", command=lambda: self.update_row(selected_table, columns))
-        update_btn.pack(pady=5)
+        self.update_btn = tkinter.Button(self.active_frame, text="Update Selected Row", command=lambda: self.update_row(selected_table, columns))
+        self.update_btn.pack(pady=5)
         
 
     def on_update_row_select(self, event):
@@ -220,24 +242,26 @@ class AircraftApp:
 
 
     def delete_frame(self):
-        self.home_content_frame.destroy()
-        self.delete_frame = tkinter.Frame(self.root)
-        self.delete_frame.pack(pady=20)
+        if self.active_frame:
+            self.active_frame.destroy()
 
-        tkinter.Label(self.delete_frame, text="Select a table to delete from:").pack()
+        self.active_frame = tkinter.Frame(self.root)
+        self.active_frame.pack(pady=20)
+
+        tkinter.Label(self.active_frame, text="Select a table to delete from:").pack()
 
         self.delete_table_var = tkinter.StringVar()
-        self.delete_table_dropdown = ttk.Combobox(self.delete_frame, textvariable=self.delete_table_var, state="readonly")
+        self.delete_table_dropdown = ttk.Combobox(self.active_frame, textvariable=self.delete_table_var, state="readonly")
         self.delete_table_dropdown["values"] = ("aircraft", "part", "employee", "customer")
         self.delete_table_dropdown.pack(pady=5)
 
-        go_button = tkinter.Button(self.delete_frame, text="Go", command=self.load_table_for_delete)
+        go_button = tkinter.Button(self.active_frame, text="Go", command=self.load_table_for_delete)
         go_button.pack(pady=5)
 
-        self.delete_tree = ttk.Treeview(self.root)
+        self.delete_tree = ttk.Treeview(self.active_frame)
         self.delete_tree.pack(fill="both", expand=True)
 
-        delete_button = tkinter.Button(self.root, text="Delete Selected Row", command=self.delete_selected_row)
+        delete_button = tkinter.Button(self.active_frame, text="Delete Selected Row", command=self.delete_selected_row)
         delete_button.pack(pady=5)
 
 
@@ -288,18 +312,20 @@ class AircraftApp:
 
 
     def insert_frame(self):
-        self.home_content_frame.destroy()
-        self.insert_frame = tkinter.Frame(self.root)
-        self.insert_frame.pack(pady=20)
+        if self.active_frame:
+            self.active_frame.destroy()
 
-        tkinter.Label(self.insert_frame, text="Select a table to insert into:").pack()
+        self.active_frame = tkinter.Frame(self.root)
+        self.active_frame.pack(pady=20)
+
+        tkinter.Label(self.active_frame, text="Select a table to insert into:").pack()
 
         self.insert_table_var = tkinter.StringVar()
-        self.insert_table_dropdown = ttk.Combobox(self.insert_frame, textvariable=self.insert_table_var, state="readonly")
+        self.insert_table_dropdown = ttk.Combobox(self.active_frame, textvariable=self.insert_table_var, state="readonly")
         self.insert_table_dropdown["values"] = ("aircraft", "part", "employee", "customer") 
         self.insert_table_dropdown.pack(pady=5)
 
-        go_button = tkinter.Button(self.insert_frame, text="Go", command=self.load_fields_for_insert)
+        go_button = tkinter.Button(self.active_frame, text="Go", command=self.load_fields_for_insert)
         go_button.pack(pady=5)
 
 
@@ -308,7 +334,7 @@ class AircraftApp:
 
         self.cursor.execute(f"SELECT * FROM {selected_table}")
         columns = [desc[0] for desc in self.cursor.description]
-
+        _ = self.cursor.fetchall()
         
         self.insert_columns = columns
         self.insert_table_name = selected_table
@@ -317,7 +343,7 @@ class AircraftApp:
         if hasattr(self, 'input_frame'):
             self.input_frame.destroy()
 
-        self.input_frame = tkinter.Frame(self.root)
+        self.input_frame = tkinter.Frame(self.active_frame)
         self.input_frame.pack(pady=10)
 
         self.input_entries = []
@@ -327,7 +353,7 @@ class AircraftApp:
             entry.grid(row=1, column=i, padx=5)
             self.input_entries.append(entry)
 
-        insert_button = tkinter.Button(self.root, text="Insert Row", command=self.insert_row)
+        insert_button = tkinter.Button(self.active_frame, text="Insert Row", command=self.insert_row)
         insert_button.pack(pady=5)
 
     def insert_row(self):
