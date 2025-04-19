@@ -72,7 +72,7 @@ class AircraftApp:
         self.active_frame.pack(pady=20)
 
 
-        tkinter.Label(self.active_frame, text="HOME").grid(row=0, column=0, sticky="e")
+        tkinter.Label(self.active_frame, text="HOME", font=("Helvetica", 18, "bold")).grid(row=0, column=0, columnspan=2, pady=20, sticky="ew")
         
 
         sql_buttons_frame = tkinter.LabelFrame(self.active_frame, text="Predefined SQL Queries", padx=10, pady=10)
